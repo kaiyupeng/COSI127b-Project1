@@ -18,7 +18,7 @@
         <h1 style="text-align:center">COSI 127b</h1><br>
         <h3 style="text-align:center">Connecting Front-End to MySQL DB</h3><br>
     </div>
-    <div class="container">
+    <!-- <div class="container">
         <form id="ageLimitForm" method="post" action="index.php">
             <div class="input-group mb-3">
                 <input type="text" class="form-control" placeholder="Enter minimum age" name="inputAge" id="inputAge">
@@ -27,7 +27,7 @@
                 </div>
             </div>
         </form>
-    </div>
+    </div> -->
     <div class="container">
         <form id="basicQueries" method="post" action="index.php">
             <div class="input-group mb-3">
@@ -37,6 +37,21 @@
             </div>
         </form>
     </div>
+    <div class="container">
+        <form id="usersLikingMovies" method="post" action="index.php">
+        <div class="form-group">
+            <label for="uemail">Email address</label>
+            <input type="email" class="form-control" id="uemail" name="uemail" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+            <label for="mpid">Movie id</label>
+            <input type="text" class="form-control" id="mpid" name="mpid" placeholder="Enter movie id" required>
+        </div>
+        <button type="submit" class="btn btn-primary" name="likeMovie" id="likeMovie">Like</button>
+        </form>
+    </div>
+    <br>
+
     <!-- <div class="container">
         <h1>Guests</h1>
         <?php
@@ -119,23 +134,10 @@
 
     </div> -->
 
-    <div class="container">
         <?php
         // Click "View All Movies"
         if(isset($_POST['viewAllMovies']))
         {
-            echo "<h1> Movies </h1>";
-            echo "<table class='table table-md table-bordered'>";
-            echo "<thead class='thead-dark' style='text-align: center'>";
-
-            echo "<tr><th class='col-md-2'>ID</th>
-            <th class='col-md-2'>Name</th>
-            <th class='col-md-2'>Rating</th>
-            <th class='col-md-2'>Production</th>
-            <th class='col-md-2'>Budget</th>
-            <th class='col-md-2'>Boxoffice collection</th>
-            </tr></thead>";
-
             class MovieRows extends RecursiveIteratorIterator {
                 function __construct($it) {
                     parent::__construct($it, self::LEAVES_ONLY);
@@ -169,6 +171,19 @@
                 FROM Movie JOIN MotionPicture mp ON Movie.mpid = mp.id");
 
                 $stmt->execute();
+                
+                echo "<div class='container'>";
+                echo "<h1> Movies </h1>";
+                echo "<table class='table table-md table-bordered'>";
+                echo "<thead class='thead-dark' style='text-align: center'>";
+
+                echo "<tr><th class='col-md-2'>ID</th>
+                <th class='col-md-2'>Name</th>
+                <th class='col-md-2'>Rating</th>
+                <th class='col-md-2'>Production</th>
+                <th class='col-md-2'>Budget</th>
+                <th class='col-md-2'>Boxoffice collection</th>
+                </tr></thead>";
 
                 $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -180,28 +195,14 @@
                 echo "Error: " . $e->getMessage();
             }
             echo "</table>";
+            echo "</div>";
             $conn = null;
         }
     
-        ?>
 
-    </div>
-
-    <div class="container">
-        <?php
         // Click "View All Actors"
         if(isset($_POST['viewAllActors']))
         {
-            echo "<h1> Actors </h1>";
-            echo "<table class='table table-md table-bordered'>";
-            echo "<thead class='thead-dark' style='text-align: center'>";
-
-            echo "<tr><th class='col-md-2'>ID</th>
-            <th class='col-md-2'>Name</th>
-            <th class='col-md-2'>Nationality</th>
-            <th class='col-md-2'>Date of birth</th>
-            <th class='col-md-2'>Gender</th>
-            </tr></thead>";
 
             class ActorRows extends RecursiveIteratorIterator {
                 function __construct($it) {
@@ -237,6 +238,18 @@
 
                 $stmt->execute();
 
+                echo "<div class='container'>";
+                echo "<h1> Actors </h1>";
+                echo "<table class='table table-md table-bordered'>";
+                echo "<thead class='thead-dark' style='text-align: center'>";
+
+                echo "<tr><th class='col-md-2'>ID</th>
+                <th class='col-md-2'>Name</th>
+                <th class='col-md-2'>Nationality</th>
+                <th class='col-md-2'>Date of birth</th>
+                <th class='col-md-2'>Gender</th>
+                </tr></thead>";
+
                 $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
                 foreach(new ActorRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
@@ -247,11 +260,62 @@
                 echo "Error: " . $e->getMessage();
             }
             echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        if(isset($_POST['likeMovie'])) 
+        {
+            $uemail = $_POST['uemail'];
+            $mpid = $_POST['mpid'];
+
+            // SQL CONNECTIONS
+            $servername = "localhost";
+            $username = "root";
+            $password = "";
+            $dbname = "COSI127b";
+
+            try {
+                
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                // check if user exists
+                $stmt1 = $conn->prepare("SELECT email FROM User WHERE email = :uemail");
+                $stmt1->bindParam(':uemail', $uemail);
+                $stmt1->execute();
+                $res1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
+
+                // check if movie exists
+                $stmt2 = $conn->prepare("SELECT mpid FROM Movie WHERE mpid = :mpid");
+                $stmt2->bindParam(':mpid', $mpid);
+                $stmt2->execute();
+                $res2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+                
+                echo "<div class='container'>";
+
+                if (empty($res1)) {
+                    echo "<p>Please register first!</p>";
+                } else if (empty($res2)) {
+                    echo "<p>Please enter a valid movie id!</p>";
+                } else { // update Likes table
+                    $stmt3 = $conn->prepare("INSERT INTO Likes VALUES (:uemail,:mpid)");
+                    $stmt3->bindParam(':uemail', $uemail);
+                    $stmt3->bindParam(':mpid', $mpid);
+                    $stmt3->execute();
+                    echo "<p>Successfully liked the movie!</p>";
+                }
+                
+                echo "</div>";
+
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            
             $conn = null;
         }
     
         ?>
-
-    </div>
 </body>
 </html>
