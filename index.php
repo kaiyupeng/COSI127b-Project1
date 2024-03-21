@@ -160,12 +160,6 @@
 
         <?php
 
-        // SQL CONNECTIONS
-        $servername = "localhost";
-        $username = "root";
-        $password = "";
-        $dbname = "COSI127b";
-
         // View All Movies
         if(isset($_POST['viewAllMovies']))
         {
@@ -182,21 +176,6 @@
                 <th class='col-md-2'>Boxoffice collection</th>
                 </tr></thead>";
 
-            class MovieRows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-                function beginChildren() {
-                    echo "<tr>";
-                }
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
-
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -207,7 +186,7 @@
 
                 $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
-                foreach(new MovieRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
                     echo $v;
                 }
             }
@@ -234,21 +213,6 @@
                 <th class='col-md-2'>Gender</th>
                 </tr></thead>";
 
-            class ActorRows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-                function beginChildren() {
-                    echo "<tr>";
-                }
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
-
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -259,7 +223,7 @@
 
                 $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
-                foreach(new ActorRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
                     echo $v;
                 }
             }
@@ -356,21 +320,6 @@
                 <th class='col-md-2'>Budget</th>
                 </tr></thead>";
 
-            class Query2Rows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-                function beginChildren() {
-                    echo "<tr>";
-                }
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
-
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -407,21 +356,6 @@
                 <th class='col-md-2'>Production</th>
                 <th class='col-md-2'>Budget</th>
                 </tr></thead>";
-
-            class Query3Rows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-                function beginChildren() {
-                    echo "<tr>";
-                }
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
 
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
@@ -461,21 +395,6 @@
             echo "<thead class='thead-dark' style='text-align: center'>";
             echo "<tr><th class='col-md-2'>Name</th></tr></thead>";
 
-            class Query4Rows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-                function beginChildren() {
-                    echo "<tr>";
-                }
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
-
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -514,21 +433,6 @@
             echo "<tr><th class='col-md-2'>Director</th>
                 <th class='col-md-2'>TV Series</th>
                 </tr></thead>";
-
-            class Query5Rows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-                function beginChildren() {
-                    echo "<tr>";
-                }
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
 
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
@@ -574,21 +478,6 @@
                 <th class='col-md-2'>Award Count</th>
                 </tr></thead>";
 
-            class Query6Rows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-                function beginChildren() {
-                    echo "<tr>";
-                }
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
-
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -629,21 +518,6 @@
             echo "<tr><th class='col-md-2'>Name</th>
                 <th class='col-md-2'>Age</th>
                 </tr></thead>";
-
-            class Query7Rows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-                function beginChildren() {
-                    echo "<tr>";
-                }
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
 
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
@@ -693,21 +567,6 @@
                 <th class='col-md-2'>Budget</th>
                 </tr></thead>";
 
-            class Query8Rows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-                function beginChildren() {
-                    echo "<tr>";
-                }
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
-
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -746,21 +605,6 @@
                 <th class='col-md-2'>Actor2</th>
                 <th class='col-md-2'>Birthday</th>
                 </tr></thead>";
-
-            class Query15Rows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-                function beginChildren() {
-                    echo "<tr>";
-                }
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
 
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
