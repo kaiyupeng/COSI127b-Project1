@@ -623,7 +623,7 @@
         if(isset($_POST['query7']))
         {
             echo "<div class='container'>";
-            echo "<h2> Motion Pictures shot in $country </h2>";
+            echo "<h2> Youngest and Oldest Awarded Actor </h2>";
             echo "<table class='table table-md table-bordered'>";
             echo "<thead class='thead-dark' style='text-align: center'>";
             echo "<tr><th class='col-md-2'>Name</th>
@@ -649,15 +649,16 @@
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                $stmt = $conn->prepare("SELECT p.name, YEAR(a.award_year) - YEAR(p.dob) AS age
-                FROM Role r
-                JOIN People p ON r.pid = p.id
+                $stmt = $conn->prepare("SELECT DISTINCT p.name, YEAR(a.award_year) - YEAR(p.dob) AS age
+                FROM People p
                 JOIN Award a ON p.id = a.pid
-                WHERE r.role_name = 'actor' AND YEAR(a.award_year) >= YEAR(p.dob)
-                AND (YEAR(a.award_year) - YEAR(p.dob) = (SELECT MAX(a.award_year - YEAR(p.dob)) AS max_age
-                FROM People p JOIN Award a ON p.id = a.pid) 
-                OR YEAR(a.award_year) - YEAR(p.dob) = (SELECT MIN(a.award_year - YEAR(p.dob)) AS min_age
-                FROM People p JOIN Award a ON p.id = a.pid))
+                AND YEAR(a.award_year) - YEAR(p.dob) IN (
+                    SELECT MAX(YEAR(a.award_year) - YEAR(p.dob)) AS max_age
+                    FROM People p JOIN Award a ON p.id = a.pid WHERE a.award_name = 'Best Actor'
+                    UNION 
+                    SELECT MIN(YEAR(a.award_year) - YEAR(p.dob)) AS min_age
+                    FROM People p JOIN Award a ON p.id = a.pid WHERE a.award_name = 'Best Actor'
+                )
                 ");
                 $stmt->execute();
 
@@ -746,7 +747,7 @@
                 <th class='col-md-2'>Birthday</th>
                 </tr></thead>";
 
-            class MovieRows extends RecursiveIteratorIterator {
+            class Query15Rows extends RecursiveIteratorIterator {
                 function __construct($it) {
                     parent::__construct($it, self::LEAVES_ONLY);
                 }
@@ -765,7 +766,7 @@
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                $stmt = $conn->prepare("SELECT p1.name AS actor1, p2.name AS actor2, p1.dob AS birthday
+                $stmt = $conn->prepare("SELECT DISTINCT p1.name AS actor1, p2.name AS actor2, p1.dob AS birthday
                 FROM People p1
                 JOIN People p2 ON p1.dob = p2.dob AND p1.id < p2.id
                 JOIN Role r1 ON p1.id = r1.pid
