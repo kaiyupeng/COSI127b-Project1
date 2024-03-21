@@ -18,36 +18,60 @@
         <h1 style="text-align:center">COSI 127b</h1><br>
         <h3 style="text-align:center">Connecting Front-End to MySQL DB</h3><br>
     </div>
-    <!-- <div class="container">
-        <form id="ageLimitForm" method="post" action="index.php">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Enter minimum age" name="inputAge" id="inputAge">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit" name="submitted" id="button-addon2">Query</button>
-                </div>
-            </div>
-        </form>
-    </div> -->
     <div class="container">
-        <form id="basicQueries" method="post" action="index.php">
+        <h3>Queries</h3>
+        <form id="buttonQueries" method="post" action="index.php">
             <div class="input-group mb-3">
+                <button class="btn" type="submit" name="query1" id="query1">List All Tables</button>
+                &nbsp;&nbsp;&nbsp;
                 <button class="btn" type="submit" name="viewAllMovies" id="viewAllMovies">View All Movies</button>
                 &nbsp;&nbsp;&nbsp;
                 <button class="btn" type="submit" name="viewAllActors" id="viewAllActors">View All Actors</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query7" id="query7">Youngest and Oldest Awarded Actor</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query15" id="query15">Actors with same birthday</button>
+                &nbsp;&nbsp;&nbsp;
+            </div>
+        </form>
+    </div>
+    <div class="container">
+        <form id="formQueries" method="post" action="index.php">
+            <div class="form-group mb-3">
+                <!-- <label for="inputParam">Input 1 parameter</label> -->
+                <input type="text" class="form-control" placeholder="Enter your parameter" name="inputParam" id="inputParam" required>
+                <button class="btn" type="submit" name="query2" id="query2">Search MP by name</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query3" id="query3">Find Movies liked by user</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query4" id="query4">Search MP by shooting country</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query5" id="query5">List Directors of Series by zip</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query6" id="query6">Find People receiving more than k awards</button>
+                &nbsp;&nbsp;&nbsp;
+            </div>
+        </form>
+        <form id="formQueries2" method="post" action="index.php">
+            <div class="input-group">
+                <!-- <label for="inputParam1">Input 2 parameters</label> -->
+                <input type="text" class="form-control" placeholder="Enter parameter X" name="inputParamX" id="inputParamX" required>
+                <input type="text" class="form-control" placeholder="Enter parameter Y" name="inputParamY" id="inputParamY" required>
+            </div>
+            <div class="form-group mb-3">
+                <button class="btn" type="submit" name="query8" id="query8">Find USA Producers with boc >= X and budget <= Y</button>
+                &nbsp;&nbsp;&nbsp;
             </div>
         </form>
     </div>
     <div class="container">
         <form id="usersLikingMovies" method="post" action="index.php">
-        <div class="form-group">
-            <label for="uemail">Email address</label>
-            <input type="email" class="form-control" id="uemail" name="uemail" placeholder="Enter your email" required>
+        <h3>Like movie</h3>
+        <div class="input-group mb-3">
+            <input type="email" class="form-control" id="uemail" name="uemail" placeholder="Enter your email" required><br>
+            <input type="text" class="form-control" id="mpid" name="mpid" placeholder="Enter movie id" required><br>
+            <button type="submit" class="btn btn-primary" name="likeMovie" id="likeMovie">Like</button>
         </div>
-        <div class="form-group">
-            <label for="mpid">Movie id</label>
-            <input type="text" class="form-control" id="mpid" name="mpid" placeholder="Enter movie id" required>
-        </div>
-        <button type="submit" class="btn btn-primary" name="likeMovie" id="likeMovie">Like</button>
         </form>
     </div>
     <br>
@@ -135,55 +159,51 @@
     </div> -->
 
         <?php
-        // Click "View All Movies"
+
+        // SQL CONNECTIONS
+        $servername = "localhost";
+        $username = "root";
+        $password = "";
+        $dbname = "COSI127b";
+
+        // View All Movies
         if(isset($_POST['viewAllMovies']))
         {
-            class MovieRows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
+            echo "<div class='container'>";
+            echo "<h2> All Movies </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
 
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-
-                function beginChildren() {
-                    echo "<tr>";
-                }
-
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
-
-            // SQL CONNECTIONS
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "COSI127b";
-
-            try {
-                
-                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-                $stmt = $conn->prepare("SELECT mp.id, mp.name, mp.rating, mp.production, mp.budget, Movie.boxoffice_collection
-                FROM Movie JOIN MotionPicture mp ON Movie.mpid = mp.id");
-
-                $stmt->execute();
-                
-                echo "<div class='container'>";
-                echo "<h1> Movies </h1>";
-                echo "<table class='table table-md table-bordered'>";
-                echo "<thead class='thead-dark' style='text-align: center'>";
-
-                echo "<tr><th class='col-md-2'>ID</th>
+            echo "<tr><th class='col-md-2'>ID</th>
                 <th class='col-md-2'>Name</th>
                 <th class='col-md-2'>Rating</th>
                 <th class='col-md-2'>Production</th>
                 <th class='col-md-2'>Budget</th>
                 <th class='col-md-2'>Boxoffice collection</th>
                 </tr></thead>";
+
+            class MovieRows extends RecursiveIteratorIterator {
+                function __construct($it) {
+                    parent::__construct($it, self::LEAVES_ONLY);
+                }
+                function current() {
+                    return "<td style='text-align:center'>" . parent::current(). "</td>";
+                }
+                function beginChildren() {
+                    echo "<tr>";
+                }
+                function endChildren() {
+                    echo "</tr>" . "\n";
+                }
+            }
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT mp.id, mp.name, mp.rating, mp.production, mp.budget, Movie.boxoffice_collection
+                FROM Movie JOIN MotionPicture mp ON Movie.mpid = mp.id");
+                $stmt->execute();
 
                 $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -199,56 +219,43 @@
             $conn = null;
         }
     
-
-        // Click "View All Actors"
+        // View All Actors
         if(isset($_POST['viewAllActors']))
         {
+            echo "<div class='container'>";
+            echo "<h2> All Actors </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
 
-            class ActorRows extends RecursiveIteratorIterator {
-                function __construct($it) {
-                    parent::__construct($it, self::LEAVES_ONLY);
-                }
-
-                function current() {
-                    return "<td style='text-align:center'>" . parent::current(). "</td>";
-                }
-
-                function beginChildren() {
-                    echo "<tr>";
-                }
-
-                function endChildren() {
-                    echo "</tr>" . "\n";
-                }
-            }
-
-            // SQL CONNECTIONS
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "COSI127b";
-
-            try {
-                
-                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-                $stmt = $conn->prepare("SELECT DISTINCT p.id, p.name, p.nationality, p.dob, p.gender
-                FROM People p JOIN Role r ON p.id = r.pid WHERE r.role_name = 'actor'");
-
-                $stmt->execute();
-
-                echo "<div class='container'>";
-                echo "<h1> Actors </h1>";
-                echo "<table class='table table-md table-bordered'>";
-                echo "<thead class='thead-dark' style='text-align: center'>";
-
-                echo "<tr><th class='col-md-2'>ID</th>
+            echo "<tr><th class='col-md-2'>ID</th>
                 <th class='col-md-2'>Name</th>
                 <th class='col-md-2'>Nationality</th>
                 <th class='col-md-2'>Date of birth</th>
                 <th class='col-md-2'>Gender</th>
                 </tr></thead>";
+
+            class ActorRows extends RecursiveIteratorIterator {
+                function __construct($it) {
+                    parent::__construct($it, self::LEAVES_ONLY);
+                }
+                function current() {
+                    return "<td style='text-align:center'>" . parent::current(). "</td>";
+                }
+                function beginChildren() {
+                    echo "<tr>";
+                }
+                function endChildren() {
+                    echo "</tr>" . "\n";
+                }
+            }
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT DISTINCT p.id, p.name, p.nationality, p.dob, p.gender
+                FROM People p JOIN Role r ON p.id = r.pid WHERE r.role_name = 'actor'");
+                $stmt->execute();
 
                 $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -264,19 +271,13 @@
             $conn = null;
         }
 
+        // Like Movie
         if(isset($_POST['likeMovie'])) 
         {
             $uemail = $_POST['uemail'];
             $mpid = $_POST['mpid'];
 
-            // SQL CONNECTIONS
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "COSI127b";
-
             try {
-                
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -299,7 +300,7 @@
                 } else if (empty($res2)) {
                     echo "<p>Please enter a valid movie id!</p>";
                 } else { // update Likes table
-                    $stmt3 = $conn->prepare("INSERT INTO Likes VALUES (:uemail,:mpid)");
+                    $stmt3 = $conn->prepare("INSERT INTO Likes VALUES (:mpid,:uemail)");
                     $stmt3->bindParam(':uemail', $uemail);
                     $stmt3->bindParam(':mpid', $mpid);
                     $stmt3->execute();
@@ -307,15 +308,487 @@
                 }
                 
                 echo "</div>";
-
             }
             catch(PDOException $e) {
                 echo "Error: " . $e->getMessage();
             }
-            
+            $conn = null;
+        }
+
+        // Query 1: List all the tables in the database.
+        if(isset($_POST['query1']))
+        {
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $stmt = $conn->prepare("show tables;");
+                $stmt->execute();
+                echo "<div class='container'>";
+                echo "<h1> All Tables </h1>";
+                echo "<p>";
+                $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                foreach($tables as $table) {
+                    echo "$table<br>";
+                }
+                echo "</p>";
+                echo "</div>";
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            $conn = null;
+        }
+
+
+        // Query 2: Search Motion Picture by Motion picture name (parameterized). 
+        // List the movie name, rating, production and budget.
+        if(isset($_POST['query2']))
+        {
+            $mpName = $_POST["inputParam"]; 
+
+            echo "<div class='container'>";
+            echo "<h2> Search Result </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-2'>Name</th>
+                <th class='col-md-2'>Rating</th>
+                <th class='col-md-2'>Production</th>
+                <th class='col-md-2'>Budget</th>
+                </tr></thead>";
+
+            class Query2Rows extends RecursiveIteratorIterator {
+                function __construct($it) {
+                    parent::__construct($it, self::LEAVES_ONLY);
+                }
+                function current() {
+                    return "<td style='text-align:center'>" . parent::current(). "</td>";
+                }
+                function beginChildren() {
+                    echo "<tr>";
+                }
+                function endChildren() {
+                    echo "</tr>" . "\n";
+                }
+            }
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT name, rating, production, budget FROM MotionPicture where name='$mpName'");
+                $stmt->execute();
+
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                    echo $v;
+                }
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
             $conn = null;
         }
     
+        // Query 3: Find the movies that have been liked by a specific user’s email (parameterized). 
+        // List the movie name, rating, production and budget.
+        if(isset($_POST['query3']))
+        {
+            $uemail = $_POST["inputParam"]; 
+
+            echo "<div class='container'>";
+            echo "<h2> Movies liked by $uemail </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-2'>Name</th>
+                <th class='col-md-2'>Rating</th>
+                <th class='col-md-2'>Production</th>
+                <th class='col-md-2'>Budget</th>
+                </tr></thead>";
+
+            class Query3Rows extends RecursiveIteratorIterator {
+                function __construct($it) {
+                    parent::__construct($it, self::LEAVES_ONLY);
+                }
+                function current() {
+                    return "<td style='text-align:center'>" . parent::current(). "</td>";
+                }
+                function beginChildren() {
+                    echo "<tr>";
+                }
+                function endChildren() {
+                    echo "</tr>" . "\n";
+                }
+            }
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT mp.name, mp.rating, mp.production, mp.budget
+                FROM Likes l
+                JOIN Movie m ON l.mpid = m.mpid
+                JOIN MotionPicture mp ON m.mpid = mp.id
+                WHERE l.uemail = '$uemail'
+                ");
+                $stmt->execute();
+
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                    echo $v;
+                }
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        // Query 4: Search motion pictures by their shooting location country (parameterized). 
+        // List only the motion picture names without any duplicates.
+        if(isset($_POST['query4']))
+        {
+            $country = $_POST["inputParam"]; 
+
+            echo "<div class='container'>";
+            echo "<h2> Motion Pictures shot in $country </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-2'>Name</th></tr></thead>";
+
+            class Query4Rows extends RecursiveIteratorIterator {
+                function __construct($it) {
+                    parent::__construct($it, self::LEAVES_ONLY);
+                }
+                function current() {
+                    return "<td style='text-align:center'>" . parent::current(). "</td>";
+                }
+                function beginChildren() {
+                    echo "<tr>";
+                }
+                function endChildren() {
+                    echo "</tr>" . "\n";
+                }
+            }
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT DISTINCT mp.name
+                FROM MotionPicture mp
+                JOIN Location l ON mp.id = l.mpid
+                WHERE l.country = '$country'
+                ");
+                $stmt->execute();
+
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                    echo $v;
+                }
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        // Query 5: List all directors who have directed TV series shot in a specific zip code (parameterized). 
+        // List the director name and TV series name only without duplicates.
+        if(isset($_POST['query5']))
+        {
+            $zip = $_POST["inputParam"]; 
+
+            echo "<div class='container'>";
+            echo "<h2> Directors of TV Series shot in $zip </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-2'>Director</th>
+                <th class='col-md-2'>TV Series</th>
+                </tr></thead>";
+
+            class Query5Rows extends RecursiveIteratorIterator {
+                function __construct($it) {
+                    parent::__construct($it, self::LEAVES_ONLY);
+                }
+                function current() {
+                    return "<td style='text-align:center'>" . parent::current(). "</td>";
+                }
+                function beginChildren() {
+                    echo "<tr>";
+                }
+                function endChildren() {
+                    echo "</tr>" . "\n";
+                }
+            }
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT DISTINCT p.name AS director, mp.name AS series
+                FROM Role r
+                JOIN People p ON r.pid = p.id
+                JOIN MotionPicture mp ON r.mpid = mp.id
+                JOIN Series s ON mp.id = s.mpid
+                JOIN Location l ON r.mpid = l.mpid
+                WHERE l.zip = '$zip' AND r.role_name = 'director'
+                ");
+                $stmt->execute();
+
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                    echo $v;
+                }
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        // Query 6: Find the people who have received more than “k” (parameterized) awards for a single motion picture in the same year. 
+        // List the person name, motion picture name, award year and award count.
+        if(isset($_POST['query6']))
+        {
+            $k = $_POST["inputParam"]; 
+
+            echo "<div class='container'>";
+            echo "<h2> People receiving more than $k awards</h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-2'>Person</th>
+                <th class='col-md-2'>Motion Picture</th>
+                <th class='col-md-2'>Award Year</th>
+                <th class='col-md-2'>Award Count</th>
+                </tr></thead>";
+
+            class Query6Rows extends RecursiveIteratorIterator {
+                function __construct($it) {
+                    parent::__construct($it, self::LEAVES_ONLY);
+                }
+                function current() {
+                    return "<td style='text-align:center'>" . parent::current(). "</td>";
+                }
+                function beginChildren() {
+                    echo "<tr>";
+                }
+                function endChildren() {
+                    echo "</tr>" . "\n";
+                }
+            }
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT p.name AS person, mp.name AS motion_picture, a.award_year, COUNT(a.award_name) AS award_count
+                FROM Award a
+                JOIN People p ON a.pid = p.id
+                JOIN MotionPicture mp ON a.mpid = mp.id
+                GROUP BY a.mpid, a.award_year
+                HAVING award_count > $k
+                ");
+                $stmt->execute();
+
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                    echo $v;
+                }
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        // Query 7: Find the youngest and oldest actors to win at least one award. 
+        // List the actor names and their age (at the time they received the award). 
+        // The age should be computed from the person’s date of birth to the award winning year only. 
+        // In case of a tie, list all of them.
+        if(isset($_POST['query7']))
+        {
+            echo "<div class='container'>";
+            echo "<h2> Motion Pictures shot in $country </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-2'>Name</th>
+                <th class='col-md-2'>Age</th>
+                </tr></thead>";
+
+            class Query7Rows extends RecursiveIteratorIterator {
+                function __construct($it) {
+                    parent::__construct($it, self::LEAVES_ONLY);
+                }
+                function current() {
+                    return "<td style='text-align:center'>" . parent::current(). "</td>";
+                }
+                function beginChildren() {
+                    echo "<tr>";
+                }
+                function endChildren() {
+                    echo "</tr>" . "\n";
+                }
+            }
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT p.name, YEAR(a.award_year) - YEAR(p.dob) AS age
+                FROM Role r
+                JOIN People p ON r.pid = p.id
+                JOIN Award a ON p.id = a.pid
+                WHERE r.role_name = 'actor' AND YEAR(a.award_year) >= YEAR(p.dob)
+                AND (YEAR(a.award_year) - YEAR(p.dob) = (SELECT MAX(a.award_year - YEAR(p.dob)) AS max_age
+                FROM People p JOIN Award a ON p.id = a.pid) 
+                OR YEAR(a.award_year) - YEAR(p.dob) = (SELECT MIN(a.award_year - YEAR(p.dob)) AS min_age
+                FROM People p JOIN Award a ON p.id = a.pid))
+                ");
+                $stmt->execute();
+
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                    echo $v;
+                }
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        // Query 8: Find the American Producers who had a box office collection of more than or equal to “X” (parameterized) with a budget less than or equal to “Y” (parameterized). 
+        // List the producer name, movie name, box office collection and budget.
+        if(isset($_POST['query8']))
+        {
+            $X = $_POST["inputParamX"]; 
+            $Y = $_POST["inputParamY"];
+
+            echo "<div class='container'>";
+            echo "<h2> American Producers with >= $X boc and <= $Y budget </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-2'>Producer</th>
+                <th class='col-md-2'>Movie</th>
+                <th class='col-md-2'>Box office collection</th>
+                <th class='col-md-2'>Budget</th>
+                </tr></thead>";
+
+            class Query8Rows extends RecursiveIteratorIterator {
+                function __construct($it) {
+                    parent::__construct($it, self::LEAVES_ONLY);
+                }
+                function current() {
+                    return "<td style='text-align:center'>" . parent::current(). "</td>";
+                }
+                function beginChildren() {
+                    echo "<tr>";
+                }
+                function endChildren() {
+                    echo "</tr>" . "\n";
+                }
+            }
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT p.name AS producer, mp.name AS movie, m.boxoffice_collection, mp.budget
+                FROM Role r
+                JOIN People p ON r.pid = p.id
+                JOIN MotionPicture mp ON r.mpid = mp.id
+                JOIN Movie m ON r.mpid = m.mpid
+                WHERE r.role_name = 'producer' AND p.nationality = 'USA' AND m.boxoffice_collection >= $X AND mp.budget <= $Y
+                ");
+                $stmt->execute();
+
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                    echo $v;
+                }
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        // Query 15: Find actors who share the same birthday. List the actor names (actor 1, actor 2) and their common birthday.
+        if(isset($_POST['query15']))
+        {
+            echo "<div class='container'>";
+            echo "<h2> Actors who share the same birthday </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-2'>Actor1</th>
+                <th class='col-md-2'>Actor2</th>
+                <th class='col-md-2'>Birthday</th>
+                </tr></thead>";
+
+            class MovieRows extends RecursiveIteratorIterator {
+                function __construct($it) {
+                    parent::__construct($it, self::LEAVES_ONLY);
+                }
+                function current() {
+                    return "<td style='text-align:center'>" . parent::current(). "</td>";
+                }
+                function beginChildren() {
+                    echo "<tr>";
+                }
+                function endChildren() {
+                    echo "</tr>" . "\n";
+                }
+            }
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT p1.name AS actor1, p2.name AS actor2, p1.dob AS birthday
+                FROM People p1
+                JOIN People p2 ON p1.dob = p2.dob AND p1.id < p2.id
+                JOIN Role r1 ON p1.id = r1.pid
+                JOIN Role r2 ON p2.id = r2.pid
+                WHERE r1.role_name = 'actor' AND r2.role_name = 'actor' AND r1.pid < r2.pid
+                ");
+                $stmt->execute();
+
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+                foreach(new MovieRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                    echo $v;
+                }
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+
         ?>
 </body>
 </html>
