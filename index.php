@@ -58,6 +58,8 @@
                 &nbsp;&nbsp;&nbsp;
                 <button class="btn" type="submit" name="query6" id="query6">Find People receiving more than k awards</button>
                 &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query9" id="query9">List People with Multiple Roles where the rating is more than x</button>
+                &nbsp;&nbsp;&nbsp;
             </div>
         </form>
         <form id="formQueries2" method="post" action="index.php">
@@ -69,8 +71,7 @@
             <div class="form-group mb-3">
                 <button class="btn" type="submit" name="query8" id="query8">Find USA Producers with boc >= X and budget <= Y</button>
                 &nbsp;&nbsp;&nbsp;
-                <button class="btn" type="submit" name="query9" id="query9">List People with Multiple Roles in a High-Rating Movie</button>
-                &nbsp;&nbsp;&nbsp;
+              
                 <button class="btn" type="submit" name="query11" id="query11">Movies with > X Likes by Users < Y Age</button>
                 &nbsp;&nbsp;&nbsp;
             </div>
@@ -613,7 +614,7 @@
 
         if(isset($_POST['query9']))
         {
-            $X = $_POST["inputParamX"]; // This is a placeholder for the actual input name for parameter X
+            $X = $_POST["inputParam"]; 
 
             echo "<div class='container'>";
             echo "<h2> People with multiple roles in movies rated over $X </h2>";
@@ -703,8 +704,8 @@
 
         if(isset($_POST['query11']))
         {
-            $X = $_POST["inputParamX"]; // Number of likes
-            $Y = $_POST["inputParamY"]; // Age threshold
+            $X = $_POST["inputParamX"]; // likes
+            $Y = $_POST["inputParamY"]; // Age 
         
             echo "<div class='container'>";
             echo "<h2> Movies with more than $X likes by users under age $Y </h2>";
@@ -890,7 +891,7 @@
 
                 $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
-                foreach(new MovieRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
                     echo $v;
                 }
             }
