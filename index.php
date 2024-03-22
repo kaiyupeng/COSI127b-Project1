@@ -30,6 +30,14 @@
                 &nbsp;&nbsp;&nbsp;
                 <button class="btn" type="submit" name="query7" id="query7">Youngest and Oldest Awarded Actor</button>
                 &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query10" id="query10">Top 2 Rated Thriller Movies Shot Exclusively in Boston</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query12" id="query12">Actors in Both Marvel and Warner Bros Productions</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query13" id="query13">Motion Pictures with Higher Rating than Average Comedy</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query14" id="query14">Top 5 Movies with Highest Number of Role Players</button>
+                &nbsp;&nbsp;&nbsp;
                 <button class="btn" type="submit" name="query15" id="query15">Actors with same birthday</button>
                 &nbsp;&nbsp;&nbsp;
             </div>
@@ -60,6 +68,10 @@
             </div>
             <div class="form-group mb-3">
                 <button class="btn" type="submit" name="query8" id="query8">Find USA Producers with boc >= X and budget <= Y</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query9" id="query9">List People with Multiple Roles in a High-Rating Movie</button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="btn" type="submit" name="query11" id="query11">Movies with > X Likes by Users < Y Age</button>
                 &nbsp;&nbsp;&nbsp;
             </div>
         </form>
@@ -453,6 +465,7 @@
                 foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
                     echo $v;
                 }
+               
             }
             catch(PDOException $e) {
                 echo "Error: " . $e->getMessage();
@@ -582,6 +595,262 @@
 
                 $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                    echo $v;
+                }
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        //Query 9: List the people who have played multiple roles in a motion picture where the rating is more
+        //than “X” (parameterized). List the person’s name, motion picture name and count of number
+        // of roles for that particular motion picture.
+
+        if(isset($_POST['query9']))
+        {
+            $X = $_POST["inputParamX"]; // This is a placeholder for the actual input name for parameter X
+
+            echo "<div class='container'>";
+            echo "<h2> People with multiple roles in movies rated over $X </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-4'>Person</th>
+                    <th class='col-md-4'>Movie</th>
+                    <th class='col-md-4'>Number of Roles</th>
+                  </tr></thead>";
+        
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+                $stmt = $conn->prepare("SELECT p.name AS person, mp.name AS movie, COUNT(r.role_name) AS num_roles
+                    FROM People p
+                    JOIN Role r ON p.id = r.pid
+                    JOIN MotionPicture mp ON r.mpid = mp.id
+                    WHERE mp.rating > :X
+                    GROUP BY p.id, mp.id
+                    HAVING COUNT(r.role_name) > 1
+                ");
+                $stmt->bindParam(':X', $X);
+                $stmt->execute();
+        
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        
+                foreach (new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k => $v) {
+                    echo $v;
+                }
+            } catch (PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        //Query 10: Find the top 2 rates thriller movies (genre is thriller) that were shot exclusively in Boston.
+        //This means that the movie cannot have any other shooting location. List the movie names and their ratings.
+
+        if(isset($_POST['query10']))
+        {
+            // $genre = $_POST["inputGenre"];
+            // $city = $_POST["inputCity"];
+
+            echo "<div class='container'>";
+            echo "<h2> Top 2 rated thriller movies shot exclusively in Boston </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-6'>Movie</th>
+                    <th class='col-md-6'>Rating</th>
+                </tr></thead>";
+
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $conn->prepare("SELECT mp.name AS movie, mp.rating
+                    FROM MotionPicture mp
+                    JOIN Genre g ON mp.id = g.mpid
+                    JOIN Location l ON mp.id = l.mpid
+                    WHERE g.genre_name = 'Thriller' AND l.city = 'Boston'
+                    GROUP BY mp.id
+                    HAVING COUNT(l.city) = 1
+                    ORDER BY mp.rating DESC
+                    LIMIT 2
+                ");
+                // $stmt->bindParam(':genre', 'Thriller');
+                // $stmt->bindParam(':city', 'Boston');
+                $stmt->execute();
+
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+                foreach (new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k => $v) {
+                    echo $v;
+                }
+            } catch (PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+        //Query 11: Find all the movies with more than “X” (parameterized) likes by users of age less than “Y” 
+        //(parameterized). List the movie names and the number of likes by those age-group users.
+
+        if(isset($_POST['query11']))
+        {
+            $X = $_POST["inputParamX"]; // Number of likes
+            $Y = $_POST["inputParamY"]; // Age threshold
+        
+            echo "<div class='container'>";
+            echo "<h2> Movies with more than $X likes by users under age $Y </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th>Movie</th><th>Number of Likes</th></tr></thead>";
+        
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+                $stmt = $conn->prepare("SELECT m.name, COUNT(l.uemail) AS likes_count
+                    FROM Movie m
+                    JOIN Likes l ON m.mpid = l.mpid
+                    JOIN User u ON l.uemail = u.email
+                    WHERE u.age < :Y
+                    GROUP BY m.name
+                    HAVING COUNT(l.uemail) > :X");
+                $stmt->bindParam(':X', $X, PDO::PARAM_INT);
+                $stmt->bindParam(':Y', $Y, PDO::PARAM_INT);
+                $stmt->execute();
+        
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        
+                foreach (new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k => $v) {
+                    echo $v;
+                }
+            } catch (PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+        //Query 12: Find the actors who have played a role in both “Marvel” and “Warner Bros” productions.
+        //List the actor names and the corresponding motion picture names.
+
+        if(isset($_POST['query12']))
+        {
+            echo "<div class='container'>";
+            echo "<h2> Actors who played roles in both Marvel and Warner Bros productions </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th>Actor</th><th>Motion Picture</th></tr></thead>";
+        
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+                $stmt = $conn->prepare("
+                    SELECT DISTINCT p.name AS actor, mp.name AS motion_picture
+                    FROM People p
+                    JOIN Role r ON p.id = r.pid
+                    JOIN MotionPicture mp ON r.mpid = mp.id
+                    WHERE p.id IN (
+                        SELECT pid
+                        FROM Role
+                        JOIN MotionPicture ON Role.mpid = MotionPicture.id
+                        WHERE production IN ('Marvel', 'Warner Bros')
+                        GROUP BY pid
+                        HAVING COUNT(DISTINCT production) > 1
+                    )
+                ");
+                $stmt->execute();
+        
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        
+                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                    echo $v;
+                }
+            }
+            catch(PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        //Query 13: Find the motion pictures that have a higher rating than the average rating of all comedy
+        //(genre) motion pictures. Show the names and ratings in descending order of ratings.
+
+        if(isset($_POST['query13']))
+        {
+            echo "<div class='container'>";
+            echo "<h2> Motion pictures with a higher rating than the average rating of all comedy movies </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th>Movie</th><th>Rating</th></tr></thead>";
+        
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+                $stmt = $conn->prepare("SELECT mp.name, mp.rating
+                    FROM MotionPicture mp
+                    WHERE mp.rating > (
+                        SELECT AVG(mp2.rating)
+                        FROM MotionPicture mp2
+                        JOIN Genre g ON mp2.id = g.mpid
+                        WHERE g.genre_name = 'Comedy'
+                    )
+                    ORDER BY mp.rating DESC");
+                $stmt->execute();
+        
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        
+                foreach (new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k => $v) {
+                    echo $v;
+                }
+            } catch (PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+            echo "</table>";
+            echo "</div>";
+            $conn = null;
+        }
+
+        //Query 14: Find the top 5 movies with the highest number of people playing a role in that movie. Show
+        //the movie name, people count and role count for the movies.
+
+        if(isset($_POST['query14']))
+        {
+            echo "<div class='container'>";
+            echo "<h2> Top 5 movies with the highest number of role players </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th>Movie</th><th>People Count</th><th>Role Count</th></tr></thead>";
+        
+            try {
+                $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+                $stmt = $conn->prepare("
+                    SELECT mp.name AS movie, COUNT(DISTINCT p.id) AS people_count, COUNT(r.role_name) AS role_count
+                    FROM MotionPicture mp
+                    JOIN Role r ON mp.id = r.mpid
+                    JOIN People p ON r.pid = p.id
+                    GROUP BY mp.id
+                    ORDER BY people_count DESC, role_count DESC
+                    LIMIT 5
+                ");
+                $stmt->execute();
+        
+                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        
                 foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
                     echo $v;
                 }
