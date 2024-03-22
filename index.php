@@ -295,24 +295,29 @@
         // Query 1: List all the tables in the database.
         if(isset($_POST['query1']))
         {
+            echo "<div class='container'>";
+            echo "<h2> All Tables </h2>";
+            echo "<table class='table table-md table-bordered'>";
+            echo "<thead class='thead-dark' style='text-align: center'>";
+            echo "<tr><th class='col-md-2'>Table</th></tr></thead>";
+
             try {
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $stmt = $conn->prepare("show tables;");
                 $stmt->execute();
-                echo "<div class='container'>";
-                echo "<h1> All Tables </h1>";
-                echo "<p>";
+                
                 $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
                 foreach($tables as $table) {
-                    echo "$table<br>";
+                    echo "<tr><td style='text-align:center'>$table</td></tr>";
                 }
-                echo "</p>";
-                echo "</div>";
             }
             catch(PDOException $e) {
                 echo "Error: " . $e->getMessage();
             }
+            echo "</table>";
+            echo "</div>";
             $conn = null;
         }
 
@@ -676,7 +681,7 @@
                     FROM MotionPicture mp
                     JOIN Movie m ON mp.id = m.mpid
                     JOIN Genre g ON mp.id = g.mpid
-                    WHERE g.genre_name = 'thriller' 
+                    WHERE g.genre_name = 'Thriller' 
                     AND mp.id IN (
                     SELECT mp.id FROM MotionPicture mp 
                     JOIN Location l ON mp.id = l.mpid 
