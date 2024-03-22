@@ -658,8 +658,7 @@
 
         if(isset($_POST['query10']))
         {
-            // $genre = $_POST["inputGenre"];
-            // $city = $_POST["inputCity"];
+           
 
             echo "<div class='container'>";
             echo "<h2> Top 2 rated thriller movies shot exclusively in Boston </h2>";
@@ -673,18 +672,23 @@
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                $stmt = $conn->prepare("SELECT mp.name AS movie, mp.rating
+                $stmt = $conn->prepare("SELECT mp.name, mp.rating
                     FROM MotionPicture mp
+                    JOIN Movie m ON mp.id = m.mpid
                     JOIN Genre g ON mp.id = g.mpid
-                    JOIN Location l ON mp.id = l.mpid
-                    WHERE g.genre_name = 'Thriller' AND l.city = 'Boston'
-                    GROUP BY mp.id
-                    HAVING COUNT(l.city) = 1
+                    WHERE g.genre_name = 'thriller' 
+                    AND mp.id IN (
+                    SELECT mp.id FROM MotionPicture mp 
+                    JOIN Location l ON mp.id = l.mpid 
+                    WHERE l.city = 'Boston')
+                    AND mp.id NOT IN (
+                    SELECT mp.id FROM MotionPicture mp 
+                    JOIN Location l ON mp.id = l.mpid 
+                    WHERE l.city != 'Boston')
                     ORDER BY mp.rating DESC
                     LIMIT 2
                 ");
-                // $stmt->bindParam(':genre', 'Thriller');
-                // $stmt->bindParam(':city', 'Boston');
+                
                 $stmt->execute();
 
                 $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
@@ -717,13 +721,14 @@
                 $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-                $stmt = $conn->prepare("SELECT m.name, COUNT(l.uemail) AS likes_count
-                    FROM Movie m
-                    JOIN Likes l ON m.mpid = l.mpid
-                    JOIN User u ON l.uemail = u.email
-                    WHERE u.age < :Y
-                    GROUP BY m.name
-                    HAVING COUNT(l.uemail) > :X");
+                $stmt = $conn->prepare("SELECT mp.name, COUNT(l.uemail) AS num_of_likes
+                FROM MotionPicture mp
+                JOIN Movie m ON mp.id = m.mpid
+                JOIN Likes l ON mp.id = l.mpid
+                JOIN User u ON u.email = l.uemail
+                WHERE u.age < $Y
+                GROUP BY l.mpid
+                HAVING num_of_likes > $X");
                 $stmt->bindParam(':X', $X, PDO::PARAM_INT);
                 $stmt->bindParam(':Y', $Y, PDO::PARAM_INT);
                 $stmt->execute();
@@ -840,7 +845,7 @@
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
                 $stmt = $conn->prepare("
-                    SELECT mp.name AS movie, COUNT(DISTINCT p.id) AS people_count, COUNT(r.role_name) AS role_count
+                    SELECT mp.name AS movie, COUNT(DISTINCT p.id) AS people_count, COUNT(DISTINCT r.role_name) AS role_count
                     FROM MotionPicture mp
                     JOIN Role r ON mp.id = r.mpid
                     JOIN People p ON r.pid = p.id
